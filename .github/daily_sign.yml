@@ -1,0 +1,45 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: JD签到薅羊毛
+
+on:
+  schedule:
+    # 此处是UTC时间，对应北京时间早八点
+    - cron : '00 00 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # checkout仓库
+    - uses: actions/checkout@v3
+    # 设置Python版本
+    - name: Set up Python 3.11.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11.9"
+    # 更新cache: "pip"
+    - name: Upgrade pip
+      run: |
+        pip install --upgrade pip
+    # 安装uv
+    - name: Install uv
+      run: |
+        pip install uv
+    # 安装依赖
+    - name: Install dependencies with uv
+      run: |
+        uv sync
+    # 运行签到
+    - name: Run daily sign with uv
+      run: |
+        uv run daily_sign.py
+      env:
+        JD_COOKIE: ${{ secrets.JD_COOKIE }}
