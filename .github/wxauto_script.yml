@@ -1,0 +1,39 @@
+# 此工作流将安装 wxauto 并进行基本的微信自动化操作
+# 更多信息请参考：https://docs.wxauto.org/
+
+name: Wxauto 微信自动化
+
+on:
+  schedule:
+    # 此处是 UTC 时间，可根据需求修改
+    - cron : '00 00 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # 检出仓库
+    - uses: actions/checkout@v3
+    # 设置 Python 版本
+    - name: Set up Python 3.11.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11.9"
+    # 更新 pip
+    - name: Upgrade pip
+      run: |
+        pip install --upgrade pip
+    # 安装 wxauto
+    - name: Install wxauto
+      run: |
+        pip install wxauto
+    # 运行 wxauto 脚本
+    - name: Run wxauto script
+      run: |
+        python -c "from wxauto import WeChat; wx = WeChat(); wx.SendMsg('这是通过 wxauto 发送的消息！', '文件传输助手')"
