@@ -32,7 +32,7 @@ import requests
 cookie = os.environ.get('COOKIE_QUARK')
 
 # 测试用环境变量
-# os.environ['COOKIE_QUARK'] = 'url=https://drive-m.quark.cn/1/clouddrive/act/growth/reward?'
+# os.environ['COOKIE_QUARK'] = 'url='
 
 # 获取环境变量
 def get_env():
@@ -108,7 +108,8 @@ class Quark:
         }
         data = {"sign_cyclic": True}
         response = requests.post(url=url, json=data, params=querystring).json()
-        #print(response)
+        print(response)
+        return
         if response.get("data"):
             return True, response["data"]["sign_daily_reward"]
         else:
@@ -186,8 +187,8 @@ def extract_params(url):
 
     # 返回所需的参数
     return {
-        'kps': params.get('kps', ''),
-        'sign': params.get('sign', ''),
+        'kps': params.get('kps_wg', ''),
+        'sign': params.get('sign_wg', ''),
         'vcode': params.get('vcode', '')
     }
 
@@ -225,8 +226,13 @@ def main():
         msg += log + "\n"
         i += 1
 
-    # print(msg)
-    return msg[:-1]
+        # # 查询余额
+        # log = Quark(user_data).queryBalance()
+        # print(log)
+        # i += 1
+
+    print(msg)
+    # return msg[:-1]
 
 
 if __name__ == "__main__":
