@@ -239,27 +239,34 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         message['Subject'] = Header(subject, 'utf-8')
         # print(message)
 
-        # 创建更稳定的SMTP连接
-        print(f"🔄 正在连接SMTP服务器: {smtp_server}:{smtp_port}")
-        server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=30)
-        server.set_debuglevel(1)  # 启用调试输出
-        
-        # 发送EHLO命令
-        print("🔄 发送EHLO握手...")
-        server.ehlo()
-        
-        # 登录并发送邮件
-        print(f"🔐 登录邮箱账号: {email_username}")
-        server.login(email_username, email_password)
-        print(f"✉️ 发送邮件到: {email_receiver}")
-        server.sendmail(sender_address, [email_receiver], message.as_string())
+        # 发送邮件
+        with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+            print(f"🔐 登录邮箱账号: {email_username}")
+            server.login(email_username, email_password)
+            print(f"✉️ 发送邮件到: {email_receiver}")
+            server.sendmail(email_username, [email_receiver], message.as_string())
 
-        # 正确关闭连接
-        print("🔄 关闭SMTP连接...")
-        try:
-            server.quit()
-        except Exception as quit_error:
-            print(f"⚠️ 关闭连接时出错: {str(quit_error)}")
+        # # 创建更稳定的SMTP连接
+        # print(f"🔄 正在连接SMTP服务器: {smtp_server}:{smtp_port}")
+        # server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=30)
+        # server.set_debuglevel(1)  # 启用调试输出
+        
+        # # 发送EHLO命令
+        # print("🔄 发送EHLO握手...")
+        # server.ehlo()
+        
+        # # 登录并发送邮件
+        # print(f"🔐 登录邮箱账号: {email_username}")
+        # server.login(email_username, email_password)
+        # print(f"✉️ 发送邮件到: {email_receiver}")
+        # server.sendmail(sender_address, [email_receiver], message.as_string())
+
+        # # 正确关闭连接
+        # print("🔄 关闭SMTP连接...")
+        # try:
+        #     server.quit()
+        # except Exception as quit_error:
+        #     print(f"⚠️ 关闭连接时出错: {str(quit_error)}")
         
         print("✅ 签到结果邮件已发送")
         return True
