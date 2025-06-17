@@ -343,24 +343,9 @@ def main():
 
     return msg[:-1]
 
-# 测试邮件发送
-def test_email():
-    msg = "✅ 测试邮件内容\n" \
-        "✅ 签到日志: 今日已签到+40.00 MB，连签进度(2/7)\n" \
-        "✅ 这是夸克签到脚本的测试邮件"
-    
-    # 使用环境变量配置
-    os.environ['SMTP_SERVER'] = "smtp.qq.com"
-    os.environ['SMTP_PORT'] = "465"
-    os.environ['EMAIL_USERNAME'] = "mountyas793@foxmail.com"  # 替换为您的QQ邮箱
-    os.environ['EMAIL_PASSWORD'] = "fzuensaacenpcabe"  # 替换为QQ邮箱授权码
-    os.environ['EMAIL_RECEIVER'] = "wangyang@cndachang.cn"  # 替换为接收邮箱
-    
-    send_email(msg, "夸克签到测试邮件")
 
 if __name__ == "__main__":
     print("----------夸克网盘开始签到----------")
-    # test_email()
     result = main()
     # 如果邮件发送失败，输出结果到控制台
     if not os.environ.get('ENABLE_EMAIL', 'true').lower() == 'true':
