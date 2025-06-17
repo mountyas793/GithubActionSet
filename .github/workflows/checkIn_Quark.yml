@@ -27,8 +27,8 @@ jobs:
       env:
         COOKIE_QUARK: ${{ secrets.COOKIE_QUARK }}
         # 邮箱配置
-        SMTP_SERVER: ${{ secrets.SMTP_SERVER  || smtp.qq.com}}
-        SMTP_PORT: ${{ secrets.SMTP_PORT || 465 }}
+        SMTP_SERVER: smtp.qq.com
+        SMTP_PORT: 465
         EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
