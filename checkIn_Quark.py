@@ -88,7 +88,7 @@ class Quark:
         }
         response = requests.get(url=url, params=querystring).json()
         #print(response)
-        if response.get("data"):
+        if response.get("data") and "sign_daily_reward" in response["data"]:
             # 签到成功，返回奖励数据
             return True, response["data"]["sign_daily_reward"]
         else:
