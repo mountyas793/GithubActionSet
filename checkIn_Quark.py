@@ -22,9 +22,13 @@ V2版-目前有效
     vcode=1750065928578;
 """
 
+import email.utils  # 新增导入
 import os
 import re
+import smtplib
 import sys
+from email.header import Header
+from email.mime.text import MIMEText
 
 import requests
 
@@ -202,6 +206,59 @@ def extract_params(url):
     }
 
 
+def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
+    '''
+    发送邮件
+    :param body: 邮件内容
+    :return: None
+    '''
+    try:
+        # 从环境变量获取邮件配置
+        smtp_server = os.environ.get('SMTP_SERVER', "smtp.qq.com")
+        smtp_port = int(os.environ.get('SMTP_PORT', 465))
+        email_username = os.environ.get('EMAIL_USERNAME')
+        email_password = os.environ.get('EMAIL_PASSWORD')
+        email_receiver = os.environ.get('EMAIL_RECEIVER')
+
+        # 验证必要的邮件配置
+        if not all([smtp_server, smtp_port, email_username, email_password, email_receiver]):
+            print("❌ 邮件配置不完整，跳过发送")
+            return False
+
+        # 严格按照RFC标准设置发件人
+        sender_name = "QuarkSignBot"
+        sender_address = email_username
+        # 格式化发件人地址
+        formatted_sender = email.utils.formataddr((sender_name, sender_address))
+
+        # 创建邮件内容
+        message = MIMEText(body, 'plain')
+        message['From'] = formatted_sender
+        message['To'] = Header(email_receiver)
+        message['Subject'] = Header(subject, 'utf-8')
+        # print(message)
+
+        # 发送邮件 - 使用更稳定的方式
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        server.login(email_username, email_password)
+        server.sendmail(email_username, [email_receiver], message.as_string())
+        server.quit()  # 显式关闭连接
+        
+        print("✅ 签到结果邮件已发送")
+        return True
+
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"❌❌❌❌ 邮件认证失败: {str(e)}")
+        print("提示：QQ邮箱需要使用授权码而非密码，请到QQ邮箱设置中生成授权码")
+        return False
+    except smtplib.SMTPException as e:
+        # 特殊处理发送失败的情况
+        print(f"❌❌ 邮件发送失败 (SMTP错误): {str(e)}")
+        return False
+    except Exception as e:
+        print(f"❌❌ 邮件发送失败: {str(e)}")
+        return False
+
 def main():
     '''
     主函数
@@ -239,12 +296,41 @@ def main():
         # log = Quark(user_data).queryBalance()
         # print(log)
         # i += 1
+    
+    print("----------夸克网盘签到完毕----------")
+    # print(msg)
 
-    print(msg)
-    # return msg[:-1]
+    # 获取自定义主题（如有）
+    email_subject = os.environ.get('EMAIL_SUBJECT', "GitHub Action 完成通知 - 夸克签到结果")
+    
+    # 发送邮件
+    if os.environ.get('ENABLE_EMAIL', 'true').lower() == 'true':
+        send_email(msg, email_subject)
+    else:
+        print("❌ 邮件发送已禁用")
 
+    return msg[:-1]
+
+# 测试邮件发送
+def test_email():
+    msg = "✅ 测试邮件内容\n" \
+        "✅ 签到日志: 今日已签到+40.00 MB，连签进度(2/7)\n" \
+        "✅ 这是夸克签到脚本的测试邮件"
+    
+    # 使用环境变量配置
+    os.environ['SMTP_SERVER'] = "smtp.qq.com"
+    os.environ['SMTP_PORT'] = "465"
+    os.environ['EMAIL_USERNAME'] = "mountyas793@foxmail.com"  # 替换为您的QQ邮箱
+    os.environ['EMAIL_PASSWORD'] = "fzuensaacenpcabe"  # 替换为QQ邮箱授权码
+    os.environ['EMAIL_RECEIVER'] = "wangyang@cndachang.cn"  # 替换为接收邮箱
+    
+    send_email(msg, "夸克签到测试邮件")
 
 if __name__ == "__main__":
     print("----------夸克网盘开始签到----------")
-    main()
-    print("----------夸克网盘签到完毕----------")
+    # test_email()
+    result = main()
+    # 如果邮件发送失败，输出结果到控制台
+    if not os.environ.get('ENABLE_EMAIL', 'true').lower() == 'true':
+        print("\n签到结果:\n" + result)
+    print("----------程序执行完毕----------")
