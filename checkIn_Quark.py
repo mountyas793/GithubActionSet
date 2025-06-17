@@ -26,6 +26,7 @@ import email.utils  # 新增导入
 import os
 import re
 import smtplib
+import socket
 import sys
 from email.header import Header
 from email.mime.text import MIMEText
@@ -238,11 +239,27 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         message['Subject'] = Header(subject, 'utf-8')
         # print(message)
 
-        # 发送邮件 - 使用更稳定的方式
-        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        # 创建更稳定的SMTP连接
+        print(f"🔄 正在连接SMTP服务器: {smtp_server}:{smtp_port}")
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=30)
+        server.set_debuglevel(1)  # 启用调试输出
+        
+        # 发送EHLO命令
+        print("🔄 发送EHLO握手...")
+        server.ehlo()
+        
+        # 登录并发送邮件
+        print(f"🔐 登录邮箱账号: {email_username}")
         server.login(email_username, email_password)
-        server.sendmail(email_username, [email_receiver], message.as_string())
-        server.quit()  # 显式关闭连接
+        print(f"✉️ 发送邮件到: {email_receiver}")
+        server.sendmail(sender_address, [email_receiver], message.as_string())
+
+        # 正确关闭连接
+        print("🔄 关闭SMTP连接...")
+        try:
+            server.quit()
+        except Exception as quit_error:
+            print(f"⚠️ 关闭连接时出错: {str(quit_error)}")
         
         print("✅ 签到结果邮件已发送")
         return True
@@ -251,9 +268,13 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         print(f"❌❌❌❌ 邮件认证失败: {str(e)}")
         print("提示：QQ邮箱需要使用授权码而非密码，请到QQ邮箱设置中生成授权码")
         return False
-    except smtplib.SMTPException as e:
-        # 特殊处理发送失败的情况
-        print(f"❌❌ 邮件发送失败 (SMTP错误): {str(e)}")
+    except smtplib.SMTPServerDisconnected as e:
+        print(f"❌❌ 服务器意外断开连接: {str(e)}")
+        print("提示：可能是网络问题或服务器限制，请稍后重试")
+        return False
+    except socket.timeout as e:
+        print(f"❌❌ 连接超时: {str(e)}")
+        print("提示：SMTP服务器响应超时，请检查网络连接")
         return False
     except Exception as e:
         print(f"❌❌ 邮件发送失败: {str(e)}")
