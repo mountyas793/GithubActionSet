@@ -89,9 +89,11 @@ class Quark:
         response = requests.get(url=url, params=querystring).json()
         #print(response)
         if response.get("data"):
-            return response["data"]
+            # 签到成功，返回奖励数据
+            return True, response["data"]["sign_daily_reward"]
         else:
-            return False
+            # 签到失败，返回错误信息
+            return False, response.get("message", "未知错误")
 
     def get_growth_sign(self):
         '''
@@ -108,12 +110,15 @@ class Quark:
         }
         data = {"sign_cyclic": True}
         response = requests.post(url=url, json=data, params=querystring).json()
-        print(response)
-        return
-        if response.get("data"):
+        # print(response)
+        # 检查响应是否包含期望的数据
+        if response.get("data") and "sign_daily_reward" in response["data"]:
+            # 返回成功状态和奖励数据
             return True, response["data"]["sign_daily_reward"]
         else:
-            return False, response["message"]
+            # 返回失败状态和错误信息
+            error_msg = response.get("message", "未知错误")
+            return False, error_msg
 
     def queryBalance(self):
         '''
@@ -139,31 +144,37 @@ class Quark:
         log = ""
         # 每日领空间
         growth_info = self.get_growth_info()
-        if growth_info:
+        if not growth_info:
+            log += "❌❌ 签到异常: 获取成长信息失败\n"
+            return log
+
+        log += (
+            f" {'88VIP' if growth_info['88VIP'] else '普通用户'} {self.param.get('user')}\n"
+            f"💾 网盘总容量：{self.convert_bytes(growth_info['total_capacity'])}，"
+            f"签到累计容量：")
+
+        if "sign_reward" in growth_info['cap_composition']:
+            log += f"{self.convert_bytes(growth_info['cap_composition']['sign_reward'])}\n"
+        else:
+            log += "0 MB\n"
+
+        if growth_info["cap_sign"]["sign_daily"]:
             log += (
-                f" {'88VIP' if growth_info['88VIP'] else '普通用户'} {self.param.get('user')}\n"
-                f"💾 网盘总容量：{self.convert_bytes(growth_info['total_capacity'])}，"
-                f"签到累计容量：")
-            if "sign_reward" in growth_info['cap_composition']:
-                log += f"{self.convert_bytes(growth_info['cap_composition']['sign_reward'])}\n"
-            else:
-                log += "0 MB\n"
-            if growth_info["cap_sign"]["sign_daily"]:
-                log += (
-                    f"✅ 签到日志: 今日已签到+{self.convert_bytes(growth_info['cap_sign']['sign_daily_reward'])}，"
-                    f"连签进度({growth_info['cap_sign']['sign_progress']}/{growth_info['cap_sign']['sign_target']})\n"
-                )
-            else:
-                sign, sign_return = self.get_growth_sign()
-                if sign:
+                f"✅ 签到日志: 今日已签到+{self.convert_bytes(growth_info['cap_sign']['sign_daily_reward'])}，"
+                f"连签进度({growth_info['cap_sign']['sign_progress']}/{growth_info['cap_sign']['sign_target']})\n"
+            )
+        else:
+            try:
+                sign_success, sign_return = self.get_growth_sign()
+                if sign_success:
                     log += (
                         f"✅ 执行签到: 今日签到+{self.convert_bytes(sign_return)}，"
                         f"连签进度({growth_info['cap_sign']['sign_progress'] + 1}/{growth_info['cap_sign']['sign_target']})\n"
                     )
                 else:
-                    log += f"❌ 签到异常: {sign_return}\n"
-        else:
-            log += "❌ 签到异常: 获取成长信息失败\n"
+                    log += f"❌❌ 签到异常: {sign_return}\n"
+            except Exception as e:
+                log += f"❌❌ 签到异常: {str(e)}\n"
 
         return log
 
@@ -232,7 +243,7 @@ def main():
         # i += 1
 
     print(msg)
-    # return msg[:-1]
+    return msg[:-1]
 
 
 if __name__ == "__main__":
