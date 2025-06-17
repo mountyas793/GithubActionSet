@@ -88,12 +88,10 @@ class Quark:
         }
         response = requests.get(url=url, params=querystring).json()
         #print(response)
-        if response.get("data") and "sign_daily_reward" in response["data"]:
-            # 签到成功，返回奖励数据
-            return True, response["data"]["sign_daily_reward"]
+        if response.get("data"):
+            return response["data"]
         else:
-            # 签到失败，返回错误信息
-            return False, response.get("message", "未知错误")
+            return False
 
     def get_growth_sign(self):
         '''
@@ -243,7 +241,7 @@ def main():
         # i += 1
 
     print(msg)
-    return msg[:-1]
+    # return msg[:-1]
 
 
 if __name__ == "__main__":
