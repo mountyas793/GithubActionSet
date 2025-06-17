@@ -284,6 +284,10 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         print("提示：SMTP服务器响应超时，请检查网络连接")
         return False
     except Exception as e:
+        # 特殊处理 QQ 邮箱的已知问题
+        if "(-1, b'\\x00\\x00\\x00')" in str(e):
+            print("⚠️ 邮件发送出现已知问题，但邮件可能已成功发送")
+            return True
         print(f"❌❌ 邮件发送失败: {str(e)}")
         return False
 
