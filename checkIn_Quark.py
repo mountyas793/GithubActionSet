@@ -242,9 +242,9 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
 
         # 发送邮件
         with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
-            print(f"🔐 登录邮箱账号: {email_username}")
+            # print(f"🔐 登录邮箱账号: {email_username}")
             server.login(email_username, email_password)
-            print(f"✉️ 发送邮件到: {email_receiver}")
+            # print(f"✉️ 发送邮件到: {email_receiver}")
             server.sendmail(email_username, [email_receiver], message.as_string())
         
         print("✅ 签到结果邮件已发送")
@@ -309,7 +309,7 @@ def main():
         # i += 1
     
     print("----------夸克网盘签到完毕----------")
-    # print(msg)
+    print(msg)
 
     # 获取自定义主题（如有）
     email_subject = os.environ.get('EMAIL_SUBJECT', "GitHub Action 完成通知 - 夸克签到结果")
