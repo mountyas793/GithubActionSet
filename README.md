@@ -1,15 +1,16 @@
 # gihub-action-sanyaosa
 
 ## 项目简介
-本项目 `gihub-action-sanyaosa` 是一个Python项目，主要功能涉及京东签到操作，具体可查看 `daily_sign.py` 文件。当前版本为 `0.1.0`，支持Python 3.11及以上版本。
+本项目 `gihub-action-sanyaosa` 是一个Python项目。支持Python 3.11及以上版本。
 
 ## 环境要求
 - Python版本：3.11及以上
-- 依赖库：`requests>=2.32.3`，可通过 `pyproject.toml` 文件进行依赖管理。
+- 依赖库：通过 `pyproject.toml` 文件进行依赖管理。
 
 ## 安装依赖
 ```bash
-pip install -r requirements.txt
+pip install uv
+uv sync
 ```
 
 ## 使用uv管理
@@ -22,7 +23,7 @@ pip install uv
 ### 使用uv运行项目
 你可以使用 `uv` 来管理和运行项目，以下是基本的使用示例：
 ```bash
-uv run daily_sign.py
+uv run xxx.py
 ```
 
 ## 文件说明
