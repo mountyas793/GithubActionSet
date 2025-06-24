@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Project: gihub_action_sanyaosa
 # @File: checkIn_Quark.py
-# @Author: 卯三
+# @Author: #3sanas
 # @Date: 2025/06/16 16:43
 # @Desc: 夸克自动签到
 """
@@ -15,10 +15,10 @@ V2版-目前有效
     环境变量名为 COOKIE_QUARK 多账户用 回车 或 && 分开
     user字段是用户名 (可是随意填写，多账户方便区分)
     例如: user=张三; url=https://drive-m.quark.cn/1/clouddrive/act/growth/reward?xxxxxx=xxxxxx&kps=abcdefg&sign=hijklmn&vcode=111111111;
-    旧版环境变量格式也兼容，例如: 
-    user=sanyaosa3; 
-    kps_wg=AAQRsBGzCtZ4qNDt6sWj2uzqjqp/Q==; 
-    sign_wg=AARVuvfjTfc=; 
+    旧版环境变量格式也兼容，例如:
+    user=sanyaosa3;
+    kps_wg=AAQRsBGzCtZ4qNDt6sWj2uzqjqp/Q==;
+    sign_wg=AARVuvfjTfc=;
     vcode=1750065928578;
 """
 
@@ -34,43 +34,46 @@ from email.mime.text import MIMEText
 import requests
 
 # 获取环境变量
-cookie = os.environ.get('COOKIE_QUARK')
+cookie = os.environ.get("COOKIE_QUARK")
 
 # 测试用环境变量
 # os.environ['COOKIE_QUARK'] = 'url='
+
 
 # 获取环境变量
 def get_env():
     # 判断 COOKIE_QUARK是否存在于环境变量
     if "COOKIE_QUARK" in os.environ:
         # 读取系统变量以 \n 或 && 分割变量
-        cookie_list = re.split('\n|&&', os.environ.get('COOKIE_QUARK'))
+        cookie_list = re.split("\n|&&", os.environ.get("COOKIE_QUARK"))
     else:
         # 标准日志输出
-        print('❌未添加COOKIE_QUARK变量')
+        print("❌未添加COOKIE_QUARK变量")
         # send('夸克自动签到', '❌未添加COOKIE_QUARK变量')
         # 脚本退出
         sys.exit(0)
 
     return cookie_list
 
+
 class Quark:
-    '''
+    """
     Quark类封装了签到、领取签到奖励的方法
-    '''
+    """
+
     def __init__(self, user_data):
-        '''
+        """
         初始化方法
         :param user_data: 用户信息，用于后续的请求
-        '''
+        """
         self.param = user_data
 
     def convert_bytes(self, b):
-        '''
+        """
         将字节转换为 MB GB TB
         :param b: 字节数
         :return: 返回 MB GB TB
-        '''
+        """
         units = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         i = 0
         while b >= 1024 and i < len(units) - 1:
@@ -79,37 +82,37 @@ class Quark:
         return f"{b:.2f} {units[i]}"
 
     def get_growth_info(self):
-        '''
+        """
         获取用户当前的签到信息
         :return: 返回一个字典，包含用户当前的签到信息
-        '''
+        """
         url = "https://drive-m.quark.cn/1/clouddrive/capacity/growth/info"
         querystring = {
             "pr": "ucpro",
             "fr": "android",
-            "kps": self.param.get('kps'),
-            "sign": self.param.get('sign'),
-            "vcode": self.param.get('vcode')
+            "kps": self.param.get("kps"),
+            "sign": self.param.get("sign"),
+            "vcode": self.param.get("vcode"),
         }
         response = requests.get(url=url, params=querystring).json()
-        #print(response)
+        # print(response)
         if response.get("data"):
             return response["data"]
         else:
             return False
 
     def get_growth_sign(self):
-        '''
+        """
         获取用户当前的签到信息
         :return: 返回一个字典，包含用户当前的签到信息
-        '''
+        """
         url = "https://drive-m.quark.cn/1/clouddrive/capacity/growth/sign"
         querystring = {
             "pr": "ucpro",
             "fr": "android",
-            "kps": self.param.get('kps'),
-            "sign": self.param.get('sign'),
-            "vcode": self.param.get('vcode')
+            "kps": self.param.get("kps"),
+            "sign": self.param.get("sign"),
+            "vcode": self.param.get("vcode"),
         }
         data = {"sign_cyclic": True}
         response = requests.post(url=url, json=data, params=querystring).json()
@@ -124,13 +127,13 @@ class Quark:
             return False, error_msg
 
     def queryBalance(self):
-        '''
+        """
         查询抽奖余额
-        '''
+        """
         url = "https://coral2.quark.cn/currency/v1/queryBalance"
         querystring = {
             "moduleCode": "1f3563d38896438db994f118d4ff53cb",
-            "kps": self.param.get('kps'),
+            "kps": self.param.get("kps"),
         }
         response = requests.get(url=url, params=querystring).json()
         # print(response)
@@ -140,10 +143,10 @@ class Quark:
             return response["msg"]
 
     def do_sign(self):
-        '''
+        """
         执行签到任务
         :return: 返回一个字符串，包含签到结果
-        '''
+        """
         log = ""
         # 每日领空间
         growth_info = self.get_growth_info()
@@ -154,10 +157,13 @@ class Quark:
         log += (
             f" {'88VIP' if growth_info['88VIP'] else '普通用户'} {self.param.get('user')}\n"
             f"💾 网盘总容量：{self.convert_bytes(growth_info['total_capacity'])}，"
-            f"签到累计容量：")
+            f"签到累计容量："
+        )
 
-        if "sign_reward" in growth_info['cap_composition']:
-            log += f"{self.convert_bytes(growth_info['cap_composition']['sign_reward'])}\n"
+        if "sign_reward" in growth_info["cap_composition"]:
+            log += (
+                f"{self.convert_bytes(growth_info['cap_composition']['sign_reward'])}\n"
+            )
         else:
             log += "0 MB\n"
 
@@ -183,47 +189,49 @@ class Quark:
 
 
 def extract_params(url):
-    '''
+    """
     从URL中提取所需的参数
     :param url: 包含参数的URL
     :return: 返回一个字典，包含所需的参数
-    '''
+    """
     # 提取URL中的查询参数部分（?后面的内容）
-    query_start = url.find('?')
-    query_string = url[query_start + 1:] if query_start != -1 else ''
+    query_start = url.find("?")
+    query_string = url[query_start + 1 :] if query_start != -1 else ""
 
     # 解析查询参数
     params = {}
-    for param in query_string.split('&'):
-        if '=' in param:
-            key, value = param.split('=', 1)
+    for param in query_string.split("&"):
+        if "=" in param:
+            key, value = param.split("=", 1)
             params[key] = value
 
     # 返回所需的参数
     return {
-        'user': params.get('user', ''),
-        'kps': params.get('kps_wg', ''),
-        'sign': params.get('sign_wg', ''),
-        'vcode': params.get('vcode', '')
+        "user": params.get("user", ""),
+        "kps": params.get("kps_wg", ""),
+        "sign": params.get("sign_wg", ""),
+        "vcode": params.get("vcode", ""),
     }
 
 
 def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
-    '''
+    """
     发送邮件
     :param body: 邮件内容
     :return: None
-    '''
+    """
     try:
         # 从环境变量获取邮件配置
-        smtp_server = os.environ.get('SMTP_SERVER', "smtp.qq.com")
-        smtp_port = int(os.environ.get('SMTP_PORT', 465))
-        email_username = os.environ.get('EMAIL_USERNAME')
-        email_password = os.environ.get('EMAIL_PASSWORD')
-        email_receiver = os.environ.get('EMAIL_RECEIVER')
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.qq.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        email_username = os.environ.get("EMAIL_USERNAME")
+        email_password = os.environ.get("EMAIL_PASSWORD")
+        email_receiver = os.environ.get("EMAIL_RECEIVER")
 
         # 验证必要的邮件配置
-        if not all([smtp_server, smtp_port, email_username, email_password, email_receiver]):
+        if not all(
+            [smtp_server, smtp_port, email_username, email_password, email_receiver]
+        ):
             print("❌ 邮件配置不完整，跳过发送")
             return False
 
@@ -234,10 +242,10 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         formatted_sender = email.utils.formataddr((sender_name, sender_address))
 
         # 创建邮件内容
-        message = MIMEText(body, 'plain')
-        message['From'] = formatted_sender
-        message['To'] = Header(email_receiver)
-        message['Subject'] = Header(subject, 'utf-8')
+        message = MIMEText(body, "plain")
+        message["From"] = formatted_sender
+        message["To"] = Header(email_receiver)
+        message["Subject"] = Header(subject, "utf-8")
         # print(message)
 
         # 发送邮件
@@ -246,7 +254,7 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
             server.login(email_username, email_password)
             # print(f"✉️ 发送邮件到: {email_receiver}")
             server.sendmail(email_username, [email_receiver], message.as_string())
-        
+
         print("✅ 签到结果邮件已发送")
         return True
 
@@ -270,11 +278,12 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult"):
         print(f"❌❌ 邮件发送失败: {str(e)}")
         return False
 
+
 def main():
-    '''
+    """
     主函数
     :return: 返回一个字符串，包含签到结果
-    '''
+    """
     msg = ""
     global cookie_quark
     cookie_quark = get_env()
@@ -285,16 +294,16 @@ def main():
     while i < len(cookie_quark):
         # 获取user_data参数
         user_data = {}  # 用户信息
-        for a in cookie_quark[i].replace(" ", "").split(';'):
-            if not a == '':
-                user_data.update({a[0:a.index('=')]: a[a.index('=') + 1:]})
-        
+        for a in cookie_quark[i].replace(" ", "").split(";"):
+            if not a == "":
+                user_data.update({a[0 : a.index("=")]: a[a.index("=") + 1 :]})
+
         # 从url参数中提取额外信息
-        if 'url' in user_data:
-            url_params = extract_params(user_data['url'])
+        if "url" in user_data:
+            url_params = extract_params(user_data["url"])
             user_data.update(url_params)
         # print(user_data)
-        
+
         # 开始任务
         log = f"🙍🏻‍♂️ 第{i + 1}个账号"
         msg += log
@@ -307,15 +316,17 @@ def main():
         # log = Quark(user_data).queryBalance()
         # print(log)
         # i += 1
-    
+
     print("----------夸克网盘签到完毕----------")
     print(msg)
 
     # 获取自定义主题（如有）
-    email_subject = os.environ.get('EMAIL_SUBJECT', "GitHub Action 完成通知 - 夸克签到结果")
-    
+    email_subject = os.environ.get(
+        "EMAIL_SUBJECT", "GitHub Action 完成通知 - 夸克签到结果"
+    )
+
     # 发送邮件
-    if os.environ.get('ENABLE_EMAIL', 'true').lower() == 'true':
+    if os.environ.get("ENABLE_EMAIL", "true").lower() == "true":
         send_email(msg, email_subject)
     else:
         print("❌ 邮件发送已禁用")
@@ -327,6 +338,6 @@ if __name__ == "__main__":
     print("----------夸克网盘开始签到----------")
     result = main()
     # 如果邮件发送失败，输出结果到控制台
-    if not os.environ.get('ENABLE_EMAIL', 'true').lower() == 'true':
+    if not os.environ.get("ENABLE_EMAIL", "true").lower() == "true":
         print("\n签到结果:\n" + result)
     print("----------程序执行完毕----------")
