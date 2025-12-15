@@ -19,7 +19,7 @@ def main():
     msg = ""
     cookie_quark = get_env()
 
-    print("✅ 检测到共", len(cookie_quark), "个夸克账号\n")
+    print("✅ 检测到共", len(cookie_quark), "个夸克账号\n, params:", cookie_quark)
 
     i = 0
     while i < len(cookie_quark):
