@@ -43,16 +43,19 @@ class Quark:
             querystring = {
                 "pr": "ucpro",
                 "fr": "android",
-                "kps": self.param.get("kps") or self.param.get("kps_wg"),
-                "sign": self.param.get("sign") or self.param.get("sign_wg"),
+                "kps": self.param["kps"],
+                "sign": self.param.get("sign"),
                 "vcode": self.param.get("vcode"),
             }
-            response = requests.get(
-                url=url, params=querystring, headers=headers, proxies={}, timeout=10
-            ).json()
+            response = requests.get(url=url, params=querystring).json()
             if response.get("data"):
                 return response["data"]
             else:
+                status_code = response.get("status")
+                error_msg = response.get("message", "未知错误")
+                status_code = response.get("status_code")
+                error_msg = response.get("message", "未知错误")
+                print(f"获取签到信息失败，状态码: {status_code}，错误信息: {error_msg}")
                 return False
         except requests.exceptions.RequestException as e:
             print(f"请求异常: {e}")

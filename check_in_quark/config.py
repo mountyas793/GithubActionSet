@@ -9,6 +9,16 @@ import os
 import re
 import sys
 
+# 尝试导入dotenv库（用于本地调试加载.env文件）
+try:
+    from dotenv import load_dotenv
+    # 加载.env文件（如果存在）
+    load_dotenv()
+    print("✅ 成功加载.env文件")
+except ImportError:
+    print("ℹ️  未找到python-dotenv库，跳过.env文件加载")
+    print("   安装命令：pip install python-dotenv")
+
 
 def get_env():
     """
@@ -23,6 +33,8 @@ def get_env():
         else:
             # 标准日志输出
             print("❌未添加COOKIE_QUARK变量")
+            print("   本地调试：请在.env文件中设置COOKIE_QUARK")
+            print("   GitHub Actions：请在Secrets中设置COOKIE_QUARK")
             # 脚本退出
             sys.exit(0)
 

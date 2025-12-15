@@ -6,7 +6,6 @@
 # @Desc: 夸克签到主入口模块
 
 from .config import get_email_config, get_env
-from .email_sender import send_email
 from .quark import Quark
 from .utils import parse_quark_url
 
@@ -19,7 +18,7 @@ def main():
     msg = ""
     cookie_quark = get_env()
 
-    print("✅ 检测到共", len(cookie_quark), "个夸克账号\n, params:", cookie_quark)
+    print("✅ 检测到共", len(cookie_quark), "个夸克账号\n")
 
     i = 0
     while i < len(cookie_quark):
@@ -50,12 +49,12 @@ def main():
     email_subject = email_config["email_subject"]
 
     # 发送邮件
-    if email_config["enable_email"]:
-        send_email(msg, email_subject, email_config)
-    else:
-        print("❌ 邮件发送已禁用")
+    # if email_config["enable_email"]:
+    #     send_email(msg, email_subject, email_config)
+    # else:
+    #     print("❌ 邮件发送已禁用")
 
-    return msg[:-1]
+    # return msg[:-1]
 
 
 if __name__ == "__main__":

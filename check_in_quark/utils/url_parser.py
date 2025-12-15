@@ -33,4 +33,19 @@ def parse_quark_url(url):
 
 
 if __name__ == "__main__":
-    pass
+    # 尝试导入dotenv库（用于本地调试加载.env文件）
+    try:
+        import os
+
+        from dotenv import load_dotenv
+
+        # 加载.env文件（如果存在）
+        load_dotenv()
+        print("✅ 成功加载.env文件")
+    except ImportError:
+        print("ℹ️  未找到python-dotenv库，跳过.env文件加载")
+        print("   安装命令：pip install python-dotenv")
+    url = os.environ.get("COOKIE_QUARK")
+    print(url)
+    params = parse_quark_url(url)
+    print(params)
