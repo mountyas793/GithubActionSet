@@ -6,7 +6,7 @@
 # @Desc: 夸克签到主入口模块
 
 from .config import get_email_config, get_env
-from .email import send_email
+from .email_sender import send_email
 from .quark import Quark
 from .utils import parse_quark_url
 

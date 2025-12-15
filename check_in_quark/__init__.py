@@ -12,7 +12,7 @@
 """
 
 from .config import get_email_config, get_env
-from .email import send_email
+from .email_sender import send_email
 from .main import main
 from .quark import Quark
 from .utils.url_parser import parse_quark_url

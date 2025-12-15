@@ -76,7 +76,6 @@ class Quark:
             response = requests.post(
                 url=url, json=data, params=querystring, proxies={}, timeout=10
             ).json()
-            # 检查响应是否包含期望的数据
             if response.get("data") and "sign_daily_reward" in response["data"]:
                 # 返回成功状态和奖励数据
                 return True, response["data"]["sign_daily_reward"]
@@ -154,3 +153,7 @@ class Quark:
                 log += f"❌❌ 签到异常: {str(e)}\n"
 
         return log
+
+
+if __name__ == "__main__":
+    pass

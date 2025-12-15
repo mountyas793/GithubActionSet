@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Project: gihub_action_sanyaosa
-# @File: email.py
+# @File: email_sender.py
 # @Author: #3sanas
 # @Date: 2025/12/15 10:38
 # @Desc: 邮件发送模块
@@ -12,7 +12,9 @@ from email.header import Header
 from email.mime.text import MIMEText
 
 
-def send_email(body, subject="GitHub Action Status - QuarkSignResult", email_config=None):
+def send_email(
+    body, subject="GitHub Action Status - QuarkSignResult", email_config=None
+):
     """
     发送邮件
     :param body: 邮件内容
@@ -22,13 +24,15 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult", email_con
     """
     try:
         # 验证必要的邮件配置
-        if not email_config or not all([
-            email_config["smtp_server"],
-            email_config["smtp_port"],
-            email_config["email_username"],
-            email_config["email_password"],
-            email_config["email_receiver"]
-        ]):
+        if not email_config or not all(
+            [
+                email_config["smtp_server"],
+                email_config["smtp_port"],
+                email_config["email_username"],
+                email_config["email_password"],
+                email_config["email_receiver"],
+            ]
+        ):
             print("❌ 邮件配置不完整，跳过发送")
             return False
 
@@ -45,12 +49,14 @@ def send_email(body, subject="GitHub Action Status - QuarkSignResult", email_con
         message["Subject"] = Header(subject, "utf-8")
 
         # 发送邮件
-        with smtplib.SMTP_SSL(email_config["smtp_server"], email_config["smtp_port"]) as server:
+        with smtplib.SMTP_SSL(
+            email_config["smtp_server"], email_config["smtp_port"]
+        ) as server:
             server.login(email_config["email_username"], email_config["email_password"])
             server.sendmail(
                 email_config["email_username"],
                 [email_config["email_receiver"]],
-                message.as_string()
+                message.as_string(),
             )
 
         print("✅ 签到结果邮件已发送")
