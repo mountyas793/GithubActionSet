@@ -15,6 +15,7 @@ def get_env():
     从环境变量中获取夸克签到的配置信息
     :return: 包含所有用户配置的列表
     """
+    print("COOKIE_QUARK:", os.environ.get("COOKIE_QUARK"))
     # 判断 COOKIE_QUARK 是否存在于环境变量
     if "COOKIE_QUARK" in os.environ:
         # 读取系统变量以 \n 或 && 分割变量
