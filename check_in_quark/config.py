@@ -15,18 +15,22 @@ def get_env():
     从环境变量中获取夸克签到的配置信息
     :return: 包含所有用户配置的列表
     """
-    print("COOKIE_QUARK:", os.environ.get("COOKIE_QUARK"))
-    # 判断 COOKIE_QUARK 是否存在于环境变量
-    if "COOKIE_QUARK" in os.environ:
-        # 读取系统变量以 \n 或 && 分割变量
-        cookie_list = re.split("\n|&&", os.environ.get("COOKIE_QUARK"))
-    else:
-        # 标准日志输出
-        print("❌未添加COOKIE_QUARK变量")
-        # 脚本退出
-        sys.exit(0)
+    try:
+        # 判断 COOKIE_QUARK 是否存在于环境变量
+        if "COOKIE_QUARK" in os.environ:
+            # 读取系统变量以 \n 或 && 分割变量
+            cookie_list = re.split("\n|&&", os.environ.get("COOKIE_QUARK"))
+            print("COOKIE_QUARK:", cookie_list)
+        else:
+            # 标准日志输出
+            print("❌未添加COOKIE_QUARK变量")
+            # 脚本退出
+            sys.exit(0)
 
-    return cookie_list
+        return cookie_list
+    except Exception as e:
+        print(f"❌获取COOKIE_QUARK变量失败: {e}")
+        sys.exit(1)
 
 
 def get_email_config():
