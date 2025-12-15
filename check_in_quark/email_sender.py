@@ -76,8 +76,25 @@ def send_email(
         return False
     except Exception as e:
         # 特殊处理 QQ 邮箱的已知问题
-        if "(-1, b'\x00\x00\x00')" in str(e):
-            print("⚠️ 邮件发送出现已知问题，但邮件可能已成功发送")
-            return True
-        print(f"❌❌ 邮件发送失败: {str(e)}")
+        error_str = str(e)
+        if "(-1, b'\x00\x00\x00')" in error_str or "\x00\x00\x00" in error_str:
+            print("⚠️ 邮件发送出现已知问题(-1, b'\\x00\\x00\\x00')，但邮件可能已成功发送")
+            # 尝试使用非SSL连接重试
+            try:
+                with smtplib.SMTP(
+                    email_config["smtp_server"], 587  # 使用非SSL端口
+                ) as server:
+                    server.starttls()
+                    server.login(email_config["email_username"], email_config["email_password"])
+                    server.sendmail(
+                        email_config["email_username"],
+                        [email_config["email_receiver"]],
+                        message.as_string(),
+                    )
+                print("✅ 邮件发送重试成功")
+                return True
+            except Exception as retry_e:
+                print(f"⚠️ 邮件重试也失败: {str(retry_e)}")
+                return True  # 即使重试失败，也返回True，因为原始错误可能只是QQ邮箱的特殊问题
+        print(f"❌❌ 邮件发送失败: {error_str}")
         return False

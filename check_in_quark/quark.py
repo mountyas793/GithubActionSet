@@ -43,8 +43,8 @@ class Quark:
             querystring = {
                 "pr": "ucpro",
                 "fr": "android",
-                "kps": self.param.get("kps"),
-                "sign": self.param.get("sign"),
+                "kps": self.param.get("kps") or self.param.get("kps_wg"),
+                "sign": self.param.get("sign") or self.param.get("sign_wg"),
                 "vcode": self.param.get("vcode"),
             }
             response = requests.get(
@@ -68,8 +68,8 @@ class Quark:
             querystring = {
                 "pr": "ucpro",
                 "fr": "android",
-                "kps": self.param.get("kps"),
-                "sign": self.param.get("sign"),
+                "kps": self.param.get("kps") or self.param.get("kps_wg"),
+                "sign": self.param.get("sign") or self.param.get("sign_wg"),
                 "vcode": self.param.get("vcode"),
             }
             data = {"sign_cyclic": True}
