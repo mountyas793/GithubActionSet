@@ -1,9 +1,10 @@
+---
 name: Quark签到
 
 on:
   schedule:
-    - cron : '00 00 * * *'  # 此处是UTC时间，对应北京时间早八点
-  workflow_dispatch:
+    - cron: '00 00 * * *'  # 此处是UTC时间，对应北京时间早八点
+  workflow_dispatch: false
 
 permissions:
   contents: read
@@ -12,26 +13,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v3
+      - name: 检出代码
+        uses: actions/checkout@v3
 
-    - name: 设置Python环境
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11.9"
+      - name: 设置Python环境
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.11.9"
 
-    - name: 安装依赖
-      run: pip install requests
+      - name: 安装 uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    - name: 执行脚本
-      env:
-        COOKIE_QUARK: ${{ secrets.COOKIE_QUARK }}
-        # 邮箱配置
-        SMTP_SERVER: smtp.qq.com
-        SMTP_PORT: 465
-        EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
-        EMAIL_SUBJECT: "GitHub Action Status - ${{ job.status }}"
-        ENABLE_EMAIL: "true"  # 可设置为false禁用邮件
-      run: python checkIn_Quark.py
+      - name: 安装依赖
+        run: uv sync
+
+      - name: 执行脚本
+        env:
+          COOKIE_QUARK: ${{ secrets.COOKIE_QUARK }}
+          # 邮箱配置
+          SMTP_SERVER: smtp.qq.com
+          SMTP_PORT: 465
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+          EMAIL_SUBJECT: "GitHub Action Status - ${{ job.status }}"
+          ENABLE_EMAIL: "true"  # 可设置为false禁用邮件
+        run: uv run main.py
